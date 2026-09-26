@@ -1,32 +1,35 @@
-# React + TypeScript + Vite
+# Khan Cloth Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Public marketing site for **Khan Cloth and Tailoring Shop** — fabric catalog + WhatsApp orders.
 
-Currently, two official plugins are available:
+## Stack
+- React + Vite + TypeScript
+- Static fabric data (`src/data/fabrics.ts`)
+- WhatsApp deep links (no backend yet)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Run
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Real vs dummy
+
+### Real (from you)
+- Logo (`public/logo.png`)
+- WhatsApp: +92 340 5666212
+- Address: B-5, Rawal Arcade, F-8 Markaz, Islamabad
+- Google Maps link
+- Hours (Mon–Sat / Sunday)
+- Instagram `@kctsinsta`, TikTok `@kcts_1`
+- Facebook page name (exact page URL still a search link — replace when you have it)
+- Free delivery all over Pakistan messaging
+
+### Dummy (replace later)
+- All fabric names, prices, and colour swatches in `src/data/fabrics.ts`
+- Payment methods note on “How to order”
+- Hero background is a designed gradient (not a real fabric photo)
+- Facebook link is a search URL until you share the exact page link
+
+## WhatsApp number
+Configured in `src/data/shop.ts` as `923405666212`.
