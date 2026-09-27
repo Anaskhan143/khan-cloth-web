@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { shop } from '../data/shop'
-import { generalOrderMessage, whatsappUrl } from '../lib/whatsapp'
-
-const waGeneral = whatsappUrl(generalOrderMessage())
+import { StickyWhatsApp } from './StickyWhatsApp'
 
 type SiteShellProps = {
   children: ReactNode
@@ -19,23 +17,24 @@ export function SiteShell({ children, active = 'home' }: SiteShellProps) {
       </div>
 
       <header className="topbar">
-        <Link to="/" className="brand-mark" aria-label={shop.name}>
-          <img src="/logo-nav.png?v=6" alt="" className="brand-logo" />
-        </Link>
-        <nav className="nav" aria-label="Main">
-          <Link to="/collection" className={active === 'collection' ? 'is-active' : undefined}>
-            Collection
+        <div className="topbar-inner">
+          <Link to="/" className="brand-mark" aria-label={shop.name}>
+            <img src="/logo-nav.png?v=6" alt="" className="brand-logo" />
           </Link>
-          <a href="/#order">Order</a>
-          <a href="/#atelier">Atelier</a>
-          <a href="/#visit">Visit</a>
-        </nav>
-        <a className="link-wa" href={waGeneral} target="_blank" rel="noreferrer">
-          WhatsApp
-        </a>
+          <nav className="nav" aria-label="Main">
+            <Link to="/collection" className={active === 'collection' ? 'is-active' : undefined}>
+              Collection
+            </Link>
+            <a href="/#order">Order</a>
+            <a href="/#atelier">Atelier</a>
+            <a href="/#visit">Visit</a>
+          </nav>
+          <div className="topbar-actions" aria-hidden />
+        </div>
       </header>
 
       {children}
+      <StickyWhatsApp />
     </div>
   )
 }

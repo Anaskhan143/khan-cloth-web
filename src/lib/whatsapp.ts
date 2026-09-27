@@ -16,11 +16,11 @@ export function fabricOrderMessage(
 I want to order fabric:
 • Fabric: ${fabricName}
 ${colorLine}• Price shown: Rs ${pricePerMeter}/meter (please confirm)
-• Meters needed: 
+• Meters needed: (e.g. 3.5 – 4 for shalwar kameez)
 • City / Address: 
 • Phone: 
 
-Free delivery all over Pakistan — please confirm.`
+Free delivery all over Pakistan — usually 2–4 working days after confirmation.`
 }
 
 export function generalOrderMessage() {
@@ -28,7 +28,8 @@ export function generalOrderMessage() {
 
 I want to order fabric / ask about availability.
 • Fabric interest: 
-• Meters: 
+• Colour: 
+• Meters: (e.g. 3.5 – 4 for shalwar kameez)
 • City / Address: 
 • Phone: 
 
@@ -38,7 +39,10 @@ Free delivery all over Pakistan.`
 export function tailoringMessage() {
   return `Assalam o Alaikum Khan Cloth!
 
-I am interested in shalwar kameez stitching / measurement booking.
-• Preferred visit day: 
+I want shalwar kameez stitching.
+• Prefer: Shop measurement / I will share measurements
+• Measurements (if ready): 
+• Fabric: (from shop / sending my own)
+• City / Delivery address: 
 • Phone: `
 }

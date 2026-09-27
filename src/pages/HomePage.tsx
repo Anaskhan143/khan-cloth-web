@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom'
 import { FabricRail } from '../components/FabricRail'
+import { FaqSection } from '../components/FaqSection'
+import { MetersGuide } from '../components/MetersGuide'
+import { ReviewsSection } from '../components/ReviewsSection'
 import { SiteFooter } from '../components/SiteFooter'
 import { SiteShell } from '../components/SiteShell'
+import { TrustStrip } from '../components/TrustStrip'
 import { fabrics } from '../data/fabrics'
 import { shop } from '../data/shop'
 import {
@@ -21,6 +25,7 @@ export function HomePage() {
   return (
     <SiteShell active="home">
       <main id="top">
+        {/* 1. Brand */}
         <section className="hero">
           <div className="hero-plane" aria-hidden>
             <div className="hero-drape" />
@@ -38,7 +43,7 @@ export function HomePage() {
               ))}
             </h1>
             <p className="hero-lede">
-              Quiet luxury fabrics from F-8 Markaz — {shop.deliveryNote}.
+              Quiet luxury fabrics from F-8 Markaz — free delivery all over Pakistan.
             </p>
             <div className="hero-actions">
               <Link className="btn btn-navy" to="/collection">
@@ -51,13 +56,14 @@ export function HomePage() {
           </div>
         </section>
 
+        {/* 2. Product first */}
         <section id="collection" className="section collection">
           <div className="section-intro">
             <p className="eyebrow">The collection</p>
             <h2>Chosen by hand. Sent to your door.</h2>
             <p className="lede">
-              A few favourites below — colours are samples for layout. Tap any fabric to open
-              WhatsApp, or browse the full collection.
+              A few favourites to begin with — open any cloth for colours, stock, and WhatsApp
+              ordering.
             </p>
           </div>
 
@@ -70,6 +76,7 @@ export function HomePage() {
           </div>
         </section>
 
+        {/* 3. How to buy */}
         <section id="order" className="section order">
           <div className="section-intro centered">
             <p className="eyebrow">How it works</p>
@@ -79,7 +86,7 @@ export function HomePage() {
             <li>
               <span className="path-num">01</span>
               <span className="path-label">Select</span>
-              <p>Choose a fabric — or tell us what you are looking for.</p>
+              <p>Choose a fabric &amp; colour — or tell us what you need.</p>
             </li>
             <li>
               <span className="path-num">02</span>
@@ -89,19 +96,26 @@ export function HomePage() {
             <li>
               <span className="path-num">03</span>
               <span className="path-label">Receive</span>
-              <p>{shop.deliveryNote}. Payment arranged on chat.</p>
+              <p>
+                {shop.deliveryNote}. {shop.deliveryTiming}.
+              </p>
             </li>
           </ol>
         </section>
 
+        {/* 4. Buying help */}
+        <MetersGuide />
+
+        {/* 5. Stitching differentiator */}
         <section id="atelier" className="atelier">
           <div className="atelier-veil" aria-hidden />
+          <div className="atelier-frame" aria-hidden />
           <div className="atelier-inner">
             <p className="eyebrow on-dark">Atelier</p>
-            <h2>Stitching, measured in person.</h2>
+            <h2>Stitching, ready for delivery.</h2>
             <p>
-              Online we focus on cloth. For shalwar kameez stitching — visit our shop for a proper
-              fit.
+              Shalwar kameez stitching in our F-8 atelier — or share your measurements on WhatsApp
+              and we stitch &amp; deliver across Pakistan.
             </p>
             <a className="btn btn-gold" href={waTailoring} target="_blank" rel="noreferrer">
               Ask about stitching
@@ -109,6 +123,16 @@ export function HomePage() {
           </div>
         </section>
 
+        {/* 6. Social proof */}
+        <ReviewsSection />
+
+        {/* 7. Trust after reviews */}
+        <TrustStrip />
+
+        {/* 8. Objections */}
+        <FaqSection />
+
+        {/* 9. Place + close */}
         <section id="visit" className="visit">
           <div className="visit-stage">
             <div className="visit-lead">
