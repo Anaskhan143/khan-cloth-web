@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { FabricRail } from '../components/FabricRail'
 import { SiteFooter } from '../components/SiteFooter'
 import { SiteShell } from '../components/SiteShell'
-import { fabrics } from '../data/fabrics'
+import { useContent } from '../context/ContentContext'
 import type { FabricCategory } from '../data/fabrics'
 import { shop } from '../data/shop'
 import { fabricCategories, filterFabrics } from '../lib/fabricsUi'
@@ -12,12 +12,13 @@ import { generalOrderMessage, whatsappUrl } from '../lib/whatsapp'
 const waGeneral = whatsappUrl(generalOrderMessage())
 
 export function CollectionPage() {
+  const { fabrics } = useContent()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<FabricCategory | 'All'>('All')
 
   const filtered = useMemo(
     () => filterFabrics(fabrics, query, category),
-    [query, category],
+    [fabrics, query, category],
   )
 
   return (
@@ -40,43 +41,35 @@ export function CollectionPage() {
           </div>
         </header>
 
-        <section className="section collection">
-          <div className="collection-toolbar">
-            <label className="collection-search">
-              <span className="visually-hidden">Search fabrics</span>
-              <input
-                type="search"
-                placeholder="Search fabric or colour…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </label>
-            <div className="collection-filters" role="group" aria-label="Filter by category">
-              {fabricCategories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  className={`filter-chip${category === cat ? ' is-active' : ''}`}
-                  onClick={() => setCategory(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+        <div className="collection-toolbar content-wrap">
+          <label className="collection-search">
+            <span className="visually-hidden">Search fabrics</span>
+            <input
+              type="search"
+              placeholder="Search by name, category, colour…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+          <div className="collection-filters" role="group" aria-label="Filter by category">
+            {fabricCategories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                className={category === cat ? 'is-active' : undefined}
+                onClick={() => setCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {filtered.length ? (
-            <FabricRail items={filtered} />
-          ) : (
-            <p className="collection-empty">
-              No fabrics match. Try another search, or{' '}
-              <a href={waGeneral} target="_blank" rel="noreferrer">
-                WhatsApp us
-              </a>
-              .
-            </p>
-          )}
-        </section>
+        {filtered.length ? (
+          <FabricRail items={filtered} />
+        ) : (
+          <p className="collection-empty">No fabrics match that search.</p>
+        )}
 
         <div className="collection-page-foot">
           <SiteFooter />

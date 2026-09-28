@@ -1,6 +1,7 @@
-import { metersGuide } from '../data/metersGuide'
+import { useContent } from '../context/ContentContext'
 
 export function MetersGuide() {
+  const { meters } = useContent()
   return (
     <section id="meters" className="section meters-guide">
       <div className="meters-layout content-wrap">
@@ -12,7 +13,7 @@ export function MetersGuide() {
           </p>
         </div>
         <ol className="meters-rail">
-          {metersGuide.map((item, i) => (
+          {meters.map((item, i) => (
             <li key={item.id} className="meters-row">
               <div className="meters-main">
                 <span className="meters-index">{String(i + 1).padStart(2, '0')}</span>

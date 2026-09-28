@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { SiteFooter } from '../components/SiteFooter'
 import { SiteShell } from '../components/SiteShell'
-import { metersGuide } from '../data/metersGuide'
-import { getFabricById } from '../data/fabrics'
+import { useContent } from '../context/ContentContext'
 import { shop } from '../data/shop'
 import { formatMoney } from '../lib/money'
 import { stockLabel } from '../lib/fabricsUi'
@@ -11,24 +10,38 @@ import { fabricOrderMessage, whatsappUrl } from '../lib/whatsapp'
 
 export function FabricDetailPage() {
   const { fabricId } = useParams<{ fabricId: string }>()
+  const { getFabricById, meters, ready } = useContent()
   const fabric = fabricId ? getFabricById(fabricId) : undefined
   const [colorId, setColorId] = useState(fabric?.colors[0]?.id ?? '')
-  const [meters, setMeters] = useState('4')
+  const [metersValue, setMeters] = useState('4')
+  const metersGuide = meters
 
   useEffect(() => {
     setColorId(fabric?.colors[0]?.id ?? '')
     setMeters('4')
   }, [fabric?.id, fabric?.colors])
 
-  if (!fabric) {
+  if (ready && !fabric) {
     return <Navigate to="/collection" replace />
+  }
+
+  if (!fabric) {
+    return (
+      <SiteShell active="collection">
+        <main className="detail-page">
+          <p className="admin-muted" style={{ padding: '4rem 1.5rem' }}>
+            Loading…
+          </p>
+        </main>
+      </SiteShell>
+    )
   }
 
   const selected = fabric.colors.find((c) => c.id === colorId) ?? fabric.colors[0]
   const orderHref = whatsappUrl(
     fabricOrderMessage(fabric.name, fabric.pricePerMeter, selected?.name).replace(
       '• Meters needed: (e.g. 3.5 – 4 for shalwar kameez)',
-      `• Meters needed: ${meters}`,
+      `• Meters needed: ${metersValue}`,
     ),
   )
 
@@ -125,7 +138,7 @@ export function FabricDetailPage() {
                   min={1}
                   max={20}
                   step={0.5}
-                  value={meters}
+                  value={metersValue}
                   onChange={(e) => setMeters(e.target.value)}
                 />
                 <div className="detail-meters-hints">

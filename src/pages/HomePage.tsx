@@ -6,8 +6,8 @@ import { ReviewsSection } from '../components/ReviewsSection'
 import { SiteFooter } from '../components/SiteFooter'
 import { SiteShell } from '../components/SiteShell'
 import { TrustStrip } from '../components/TrustStrip'
-import { fabrics } from '../data/fabrics'
 import { shop } from '../data/shop'
+import { useContent } from '../context/ContentContext'
 import {
   generalOrderMessage,
   tailoringMessage,
@@ -19,9 +19,11 @@ export const HOME_FABRIC_PREVIEW = 5
 
 const waGeneral = whatsappUrl(generalOrderMessage())
 const waTailoring = whatsappUrl(tailoringMessage())
-const previewFabrics = fabrics.slice(0, HOME_FABRIC_PREVIEW)
 
 export function HomePage() {
+  const { fabrics } = useContent()
+  const previewFabrics = fabrics.slice(0, HOME_FABRIC_PREVIEW)
+
   return (
     <SiteShell active="home">
       <main id="top">

@@ -1,9 +1,14 @@
-import { useState } from 'react'
-import { faqs } from '../data/faq'
+import { useEffect, useState } from 'react'
+import { useContent } from '../context/ContentContext'
 import { shop } from '../data/shop'
 
 export function FaqSection() {
-  const [openId, setOpenId] = useState<string | null>(faqs[0]?.id ?? null)
+  const { faqs } = useContent()
+  const [openId, setOpenId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setOpenId((prev) => prev ?? faqs[0]?.id ?? null)
+  }, [faqs])
 
   return (
     <section id="faq" className="section faq">

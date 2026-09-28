@@ -1,6 +1,7 @@
-import { reviews } from '../data/reviews'
+import { useContent } from '../context/ContentContext'
 
 export function ReviewsSection() {
+  const { reviews } = useContent()
   return (
     <section id="reviews" className="section reviews">
       <div className="content-wrap">
