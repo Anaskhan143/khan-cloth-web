@@ -1,7 +1,8 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useContent } from '../../context/ContentContext'
-import type { Fabric, FabricCategory, FabricColor } from '../../data/fabrics'
+import type { Fabric, FabricCategory, FabricColor, StockStatus } from '../../data/fabrics'
+import { uploadFabricImage } from '../../lib/storage'
 import { supabase } from '../../lib/supabase'
 
 const categories: FabricCategory[] = [
@@ -14,6 +15,19 @@ const categories: FabricCategory[] = [
   'Occasion',
 ]
 
+const stockOptions: { value: StockStatus; label: string }[] = [
+  { value: 'in_stock', label: 'In stock' },
+  { value: 'low', label: 'Low' },
+  { value: 'ask', label: 'Ask' },
+]
+
+const emptyColor = (): FabricColor => ({
+  id: '',
+  name: '',
+  swatch: '#c8c4bc',
+  stock: 'in_stock',
+})
+
 const emptyFabric = (): Fabric => ({
   id: '',
   name: '',
@@ -21,7 +35,7 @@ const emptyFabric = (): Fabric => ({
   pricePerMeter: 0,
   note: '',
   description: '',
-  colors: [],
+  colors: [emptyColor()],
   dummy: true,
 })
 
@@ -36,9 +50,9 @@ function slugify(value: string) {
 export function AdminFabricsPage() {
   const { fabrics, refresh } = useContent()
   const [editing, setEditing] = useState<Fabric | null>(null)
-  const [colorsText, setColorsText] = useState('[]')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState<string | null>(null)
 
   const sorted = useMemo(
     () => [...fabrics].sort((a, b) => a.name.localeCompare(b.name)),
@@ -47,14 +61,73 @@ export function AdminFabricsPage() {
 
   const startCreate = () => {
     setEditing(emptyFabric())
-    setColorsText('[]')
     setError(null)
   }
 
   const startEdit = (fabric: Fabric) => {
-    setEditing({ ...fabric, colors: [...fabric.colors] })
-    setColorsText(JSON.stringify(fabric.colors, null, 2))
+    setEditing({
+      ...fabric,
+      colors: fabric.colors.length ? fabric.colors.map((c) => ({ ...c })) : [emptyColor()],
+    })
     setError(null)
+  }
+
+  const updateColor = (index: number, patch: Partial<FabricColor>) => {
+    setEditing((prev) => {
+      if (!prev) return prev
+      const colors = prev.colors.map((c, i) => (i === index ? { ...c, ...patch } : c))
+      return { ...prev, colors }
+    })
+  }
+
+  const addColor = () => {
+    setEditing((prev) =>
+      prev ? { ...prev, colors: [...prev.colors, emptyColor()] } : prev,
+    )
+  }
+
+  const removeColor = (index: number) => {
+    setEditing((prev) => {
+      if (!prev) return prev
+      const colors = prev.colors.filter((_, i) => i !== index)
+      return { ...prev, colors: colors.length ? colors : [emptyColor()] }
+    })
+  }
+
+  const uploadCover = async (file: File | undefined) => {
+    if (!file) return
+    const folder = `covers/${editing?.id || slugify(editing?.name ?? '') || 'new'}`
+    setUploading('cover')
+    setError(null)
+    try {
+      const url = await uploadFabricImage(file, folder)
+      setEditing((prev) => (prev ? { ...prev, image: url } : prev))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Cover upload failed.')
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  const uploadColorImage = async (index: number, file: File | undefined) => {
+    if (!file || !editing) return
+    const color = editing.colors[index]
+    const fabricKey = editing.id || slugify(editing.name) || 'new'
+    const colorKey = slugify(color?.name ?? '') || `color-${index + 1}`
+    setUploading(`color-${index}`)
+    setError(null)
+    try {
+      const url = await uploadFabricImage(file, `colors/${fabricKey}/${colorKey}`)
+      setEditing((prev) => {
+        if (!prev) return prev
+        const colors = prev.colors.map((c, i) => (i === index ? { ...c, image: url } : c))
+        return { ...prev, colors }
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Colour image upload failed.')
+    } finally {
+      setUploading(null)
+    }
   }
 
   const save = async (e: FormEvent) => {
@@ -64,18 +137,30 @@ export function AdminFabricsPage() {
       return
     }
 
-    let colors: FabricColor[] = []
-    try {
-      colors = JSON.parse(colorsText) as FabricColor[]
-      if (!Array.isArray(colors)) throw new Error('Colors must be an array')
-    } catch {
-      setError('Colors JSON is invalid.')
-      return
-    }
-
     const id = editing.id || slugify(editing.name)
     if (!id || !editing.name) {
       setError('Name is required.')
+      return
+    }
+
+    const colors: FabricColor[] = []
+    for (const [i, c] of editing.colors.entries()) {
+      const name = c.name.trim()
+      if (!name) {
+        setError(`Colour ${i + 1} needs a name.`)
+        return
+      }
+      colors.push({
+        id: c.id || slugify(name),
+        name,
+        swatch: c.swatch.trim() || '#c8c4bc',
+        stock: c.stock,
+        ...(c.image ? { image: c.image } : {}),
+      })
+    }
+
+    if (!colors.length) {
+      setError('Add at least one colour.')
       return
     }
 
@@ -84,7 +169,7 @@ export function AdminFabricsPage() {
     const sortOrder = fabrics.findIndex((f) => f.id === id)
     const { error: saveError } = await supabase.from('fabrics').upsert({
       id,
-      name: editing.name,
+      name: editing.name.trim(),
       category: editing.category,
       price_per_meter: Number(editing.pricePerMeter) || 0,
       note: editing.note,
@@ -131,7 +216,7 @@ export function AdminFabricsPage() {
       {error ? <p className="admin-error">{error}</p> : null}
 
       {editing ? (
-        <form className="admin-card block" onSubmit={save}>
+        <form className="admin-card block" onSubmit={(e) => void save(e)}>
           <h3>{editing.id ? 'Edit collection' : 'New collection'}</h3>
           <div className="admin-grid-2">
             <label className="admin-field">
@@ -185,20 +270,147 @@ export function AdminFabricsPage() {
               onChange={(e) => setEditing({ ...editing, description: e.target.value })}
             />
           </label>
-          <label className="admin-field">
-            <span>Colours JSON</span>
-            <textarea
-              rows={10}
-              value={colorsText}
-              onChange={(e) => setColorsText(e.target.value)}
-              spellCheck={false}
-            />
-            <span className="admin-hint">
-              Array of {'{ id, name, swatch, stock }'} — stock: in_stock | low | ask
-            </span>
-          </label>
+
+          <div className="admin-field">
+            <span>Cover image</span>
+            <div className="admin-media-row">
+              {editing.image ? (
+                <img src={editing.image} alt="" className="admin-thumb" />
+              ) : (
+                <div className="admin-thumb placeholder" aria-hidden />
+              )}
+                  <div className="admin-media-controls">
+                <input
+                  type="file"
+                  accept="image/*,.heic,.heif,image/heic,image/heif"
+                  disabled={busy || uploading !== null}
+                  onChange={(e) => void uploadCover(e.target.files?.[0])}
+                />
+                {uploading === 'cover' ? (
+                  <span className="admin-hint">Uploading (HEIC converts to JPG)…</span>
+                ) : (
+                  <span className="admin-hint">JPG, PNG, WebP, HEIC — HEIC is converted automatically.</span>
+                )}
+                {editing.image ? (
+                  <button
+                    type="button"
+                    className="admin-link-btn danger"
+                    onClick={() =>
+                      setEditing((prev) => (prev ? { ...prev, image: undefined } : prev))
+                    }
+                  >
+                    Remove cover
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-colors">
+            <div className="admin-colors-head">
+              <h4>Colours</h4>
+              <button type="button" className="admin-btn ghost" onClick={addColor}>
+                Add colour
+              </button>
+            </div>
+            <p className="admin-muted">
+              Each colour needs a name, swatch, stock status, and optional photo.
+            </p>
+
+            {editing.colors.map((color, index) => (
+              <div key={`${color.id || 'new'}-${index}`} className="admin-color-card">
+                <div className="admin-media-row">
+                  {color.image ? (
+                    <img src={color.image} alt="" className="admin-thumb" />
+                  ) : (
+                    <div
+                      className="admin-thumb"
+                      style={{ background: color.swatch }}
+                      aria-hidden
+                    />
+                  )}
+                  <div className="admin-media-controls">
+                    <input
+                      type="file"
+                      accept="image/*,.heic,.heif,image/heic,image/heif"
+                      disabled={busy || uploading !== null}
+                      onChange={(e) => void uploadColorImage(index, e.target.files?.[0])}
+                    />
+                    {uploading === `color-${index}` ? (
+                      <span className="admin-hint">Uploading (HEIC converts to JPG)…</span>
+                    ) : null}
+                    {color.image ? (
+                      <button
+                        type="button"
+                        className="admin-link-btn danger"
+                        onClick={() => updateColor(index, { image: undefined })}
+                      >
+                        Remove photo
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="admin-grid-2">
+                  <label className="admin-field">
+                    <span>Colour name</span>
+                    <input
+                      value={color.name}
+                      onChange={(e) => updateColor(index, { name: e.target.value })}
+                      placeholder="e.g. Ivory"
+                      required
+                    />
+                  </label>
+                  <label className="admin-field">
+                    <span>Stock</span>
+                    <select
+                      value={color.stock}
+                      onChange={(e) =>
+                        updateColor(index, { stock: e.target.value as StockStatus })
+                      }
+                    >
+                      {stockOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="admin-field">
+                    <span>Swatch colour</span>
+                    <div className="admin-swatch-field">
+                      <input
+                        type="color"
+                        value={
+                          /^#[0-9a-fA-F]{6}$/.test(color.swatch) ? color.swatch : '#c8c4bc'
+                        }
+                        onChange={(e) => updateColor(index, { swatch: e.target.value })}
+                        aria-label={`Swatch for ${color.name || `colour ${index + 1}`}`}
+                      />
+                      <input
+                        value={color.swatch}
+                        onChange={(e) => updateColor(index, { swatch: e.target.value })}
+                        placeholder="#c8c4bc"
+                      />
+                    </div>
+                  </label>
+                </div>
+
+                <div className="admin-actions">
+                  <button
+                    type="button"
+                    className="admin-link-btn danger"
+                    onClick={() => removeColor(index)}
+                  >
+                    Remove colour
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
           <div className="admin-actions">
-            <button type="submit" className="admin-btn" disabled={busy}>
+            <button type="submit" className="admin-btn" disabled={busy || uploading !== null}>
               {busy ? 'Saving…' : 'Save'}
             </button>
             <button type="button" className="admin-btn ghost" onClick={() => setEditing(null)}>
@@ -250,4 +462,3 @@ export function AdminFabricsPage() {
     </div>
   )
 }
-

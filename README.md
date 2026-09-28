@@ -19,9 +19,10 @@ Without env vars the public site still works from local data. Admin login needs 
 ## Admin setup (Supabase)
 
 1. Create a free project at [supabase.com](https://supabase.com).
-2. In the SQL Editor, run the full script in `supabase/schema.sql` (tables + RLS: public read, authenticated write).
+2. In the SQL Editor, run the full script in `supabase/schema.sql` (tables + RLS + public `fabrics` storage bucket for collection / colour photos).
+   If you already ran an older schema, re-run at least the **storage** section at the bottom of that file so image uploads work.
 3. Authentication → Users → Add user: create an email/password account (that email is the admin username).
-4. Project Settings → API: copy **Project URL** and **anon public** key into `.env`:
+4. Project Settings → API Keys: copy **Project URL** and **anon** / **publishable** key into `.env`:
 
 ```bash
 cp .env.example .env
@@ -31,7 +32,8 @@ cp .env.example .env
 ```
 
 5. Restart `npm run dev`, open `/admin/login`, sign in, then on the dashboard click **Import starter content** to load fabrics, FAQs, reviews, and meters from the codebase into the database.
-6. For production (e.g. Vercel), add the same `VITE_*` env vars and redeploy.
+6. In **Collections**, add/edit fabrics with a cover image and per-colour photos (uploaded to Supabase Storage).
+7. For production (e.g. Vercel), add the same `VITE_*` env vars and redeploy.
 
 Edits in `/admin` save to Supabase and show on the public site. Without Supabase, the site keeps using `src/data/*.ts`.
 

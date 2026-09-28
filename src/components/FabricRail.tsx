@@ -14,6 +14,7 @@ export function FabricRail({ items, indexOffset = 0 }: FabricRailProps) {
         const reverse = i % 2 === 1
         const displayIndex = indexOffset + i + 1
         const face = fabric.colors[0]
+        const faceImage = face?.image || fabric.image
         return (
           <li
             key={fabric.id}
@@ -23,7 +24,15 @@ export function FabricRail({ items, indexOffset = 0 }: FabricRailProps) {
             <Link className="fabric-link" to={`/collection/${fabric.id}`}>
               <div
                 className="fabric-face"
-                style={{ background: face?.swatch }}
+                style={
+                  faceImage
+                    ? {
+                        backgroundImage: `url(${faceImage})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }
+                    : { background: face?.swatch }
+                }
                 aria-hidden
               >
                 <span className="fabric-grain" />

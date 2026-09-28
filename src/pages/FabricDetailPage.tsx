@@ -109,7 +109,15 @@ export function FabricDetailPage() {
                       >
                         <span
                           className="detail-color-swatch"
-                          style={{ background: color.swatch }}
+                          style={
+                            color.image
+                              ? {
+                                  backgroundImage: `url(${color.image})`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                }
+                              : { background: color.swatch }
+                          }
                           aria-hidden
                         >
                           <span className="fabric-grain" />

@@ -75,3 +75,28 @@ drop policy if exists "Public read meters" on public.meters_guide;
 create policy "Public read meters" on public.meters_guide for select using (true);
 drop policy if exists "Auth write meters" on public.meters_guide;
 create policy "Auth write meters" on public.meters_guide for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+
+-- Public image storage for collections / colour photos
+insert into storage.buckets (id, name, public)
+values ('fabrics', 'fabrics', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "Public read fabric images" on storage.objects;
+create policy "Public read fabric images"
+  on storage.objects for select
+  using (bucket_id = 'fabrics');
+
+drop policy if exists "Auth upload fabric images" on storage.objects;
+create policy "Auth upload fabric images"
+  on storage.objects for insert
+  with check (bucket_id = 'fabrics' and auth.role() = 'authenticated');
+
+drop policy if exists "Auth update fabric images" on storage.objects;
+create policy "Auth update fabric images"
+  on storage.objects for update
+  using (bucket_id = 'fabrics' and auth.role() = 'authenticated');
+
+drop policy if exists "Auth delete fabric images" on storage.objects;
+create policy "Auth delete fabric images"
+  on storage.objects for delete
+  using (bucket_id = 'fabrics' and auth.role() = 'authenticated');

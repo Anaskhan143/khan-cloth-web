@@ -746,8 +746,17 @@ main,
 }
 
 .collection-page-foot {
-  padding: 0 var(--page-pad) 1.5rem;
+  padding: clamp(2.5rem, 7vw, 4.5rem) var(--page-pad) 1.5rem;
   background: linear-gradient(180deg, transparent, var(--stone));
+}
+
+.collection-page .fabric-rail {
+  padding-bottom: clamp(2rem, 6vw, 3.5rem);
+}
+
+.collection-page .collection-empty {
+  padding: 1rem var(--page-pad) clamp(3rem, 8vw, 5rem);
+  text-align: center;
 }
 
 .footer-standalone {
@@ -2661,6 +2670,95 @@ main,
 
 .admin-table tr:last-child td {
   border-bottom: none;
+}
+
+.admin-media-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.85rem 1.1rem;
+}
+
+.admin-thumb {
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: var(--stone);
+  flex-shrink: 0;
+}
+
+.admin-thumb.placeholder {
+  background:
+    linear-gradient(135deg, transparent 46%, var(--line) 46%, var(--line) 54%, transparent 54%),
+    var(--stone);
+}
+
+.admin-media-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.admin-media-controls input[type='file'] {
+  font: inherit;
+  font-size: 0.82rem;
+  max-width: 100%;
+}
+
+.admin-colors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0.35rem;
+}
+
+.admin-colors-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-colors-head h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--navy);
+}
+
+.admin-color-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.admin-swatch-field {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.admin-swatch-field input[type='color'] {
+  width: 2.5rem;
+  height: 2.35rem;
+  padding: 0.15rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-swatch-field input[type='text'],
+.admin-swatch-field input:not([type='color']) {
+  flex: 1;
+  min-width: 0;
 }
 
 @media (max-width: 640px) {
